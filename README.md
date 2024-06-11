@@ -6,8 +6,3 @@ chmod +x ./start.sh
 ```
 ./start.sh
 ```
-
-#### 3. Run image
-```
- docker run --rm -it hadoop-base
-```
