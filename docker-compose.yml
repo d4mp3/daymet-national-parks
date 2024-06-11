@@ -24,3 +24,24 @@ services:
       timeout: 45s
       interval: 10s
       retries: 10
+
+  datanode:
+    build: ./docker/hadoop/hadoop-datanode
+    restart: always
+    container_name: datanode
+    logging:
+      driver: "json-file"
+      options:
+          max-file: "5"
+          max-size: "10m"
+    depends_on:
+      - namenode
+    volumes:
+      - ./mnt/hadoop/datanode:/hadoop/dfs/data
+    environment:
+      - SERVICE_PRECONDITION=namenode:9870
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "datanode", "9864" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10 
