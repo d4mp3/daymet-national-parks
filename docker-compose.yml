@@ -73,25 +73,25 @@ services:
       interval: 10s
       retries: 10 
 
-    # hive-metastore:
-    #   build: ./docker/hive/hive-metastore
-    #   restart: always
-    #   container_name: hive-metastore
-    #   logging:
-    #     driver: "json-file"
-    #     options:
-    #         max-file: "5"
-    #         max-size: "10m"
-    #   depends_on:
-    #     - namenode
-    #     - datanode
-    #     - postgres
-    #   environment:
-    #     - SERVICE_PRECONDITION=namenode:9870 datanode:9864 postgres:5432
-    #   ports:
-    #     - "32761:9083"
-    #   healthcheck:
-    #     test: [ "CMD", "nc", "-z", "hive-metastore", "9083" ]
-    #     timeout: 45s
-    #     interval: 10s
-    #     retries: 10
+    hive-metastore:
+      build: ./docker/hive/hive-metastore
+      restart: always
+      container_name: hive-metastore
+      logging:
+        driver: "json-file"
+        options:
+            max-file: "5"
+            max-size: "10m"
+      depends_on:
+        - namenode
+        - datanode
+        - postgres
+      environment:
+        - SERVICE_PRECONDITION=namenode:9870 datanode:9864 postgres:5432
+      ports:
+        - "32761:9083"
+      healthcheck:
+        test: [ "CMD", "nc", "-z", "hive-metastore", "9083" ]
+        timeout: 45s
+        interval: 10s
+        retries: 10

@@ -1,7 +1,7 @@
 FROM openjdk:8-jdk-slim-buster
 LABEL maintainer="dampe"
 
-ENV HADOOP_VERSION=3.4.0
+ENV HADOOP_VERSION=3.3.6
 ENV HADOOP_HOME=/opt/hadoop
 ENV HADOOP_CONF_DIR=/etc/hadoop
 ENV USER=root
