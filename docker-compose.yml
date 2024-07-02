@@ -126,6 +126,25 @@ services:
       interval: 10s
       retries: 10
 
+  hive-webhcat:
+    build: ./docker/hive/hive-webhcat
+    restart: always
+    container_name: hive-webhcat
+    logging:
+      driver: "json-file"
+      options:
+          max-file: "5"
+          max-size: "10m"
+    depends_on:
+      - hive-server
+    environment:
+      - SERVICE_PRECONDITION=hive-server:10000
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "hive-webhcat", "50111" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+ 
 ######################################################
 # NETWORK
 ######################################################
