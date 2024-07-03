@@ -5,7 +5,7 @@ ENV HADOOP_VERSION=3.3.6
 ENV HADOOP_HOME=/opt/hadoop
 ENV HADOOP_CONF_DIR=/etc/hadoop
 ENV USER=root
-ENV PATH ${HADOOP_HOME}/bin/:$PATH
+ENV PATH=${HADOOP_HOME}/bin/:$PATH
 
 RUN apt-get update -yqq && \
     apt-get upgrade -yqq && \
