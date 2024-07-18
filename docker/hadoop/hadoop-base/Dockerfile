@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-slim-buster
+FROM openjdk:8-jdk-slim-bullseye
 LABEL maintainer="dampe"
 
 ENV HADOOP_VERSION=3.3.6
