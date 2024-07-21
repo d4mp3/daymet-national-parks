@@ -5,7 +5,7 @@ services:
 # DATABASE SERVICE
 ######################################################
   postgres:
-    build: './docker/postgres'
+    image: postgres:11.4-alpine
     restart: always
     container_name: postgres
     logging:
