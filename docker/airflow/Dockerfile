@@ -3,8 +3,7 @@ FROM spark-base:latest
 LABEL maintainer="dampe"
 
 # Arguments that can be set with docker build
-ARG AIRFLOW_VERSION=2.4.3
-ARG PYTHON_VERSION=3.10
+ARG AIRFLOW_VERSION=2.1.4
 ARG AIRFLOW_HOME=/opt/airflow
 
 # Export the environment variable AIRFLOW_HOME where airflow will be installed
@@ -33,21 +32,23 @@ RUN apt-get update -y && \
     unzip \
     gcc \
     vim \
-    netcat-traditional \
+    netcat \
     && apt-get autoremove -yqq --purge && apt-get clean
 
 # Upgrade pip
 # Create airflow user 
 # Install apache airflow with subpackages
-RUN useradd -ms /bin/bash -d ${AIRFLOW_HOME} airflow && \
-    pip install "apache-airflow[celery]==${AIRFLOW_VERSION}" --constraint https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt
-    # pip install apache-airflow-providers-apache-hdfs==4.4.2 && \
-    # pip install apache-airflow-providers-apache-spark==4.8.2 && \
-    # pip install apache-airflow-providers-slack==8.7.1 && \
-    # pip install apache-airflow-providers-http==4.12.0
+RUN pip install --upgrade "pip==20.2.4" && \
+    useradd -ms /bin/bash -d ${AIRFLOW_HOME} airflow && \
+    pip install apache-airflow==${AIRFLOW_VERSION} --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.1.4/constraints-3.7.txt && \
+    pip install apache-airflow-providers-apache-hdfs==2.1.0 && \
+    pip install apache-airflow-providers-apache-hive==2.0.2 && \
+    pip install apache-airflow-providers-apache-spark==2.0.1 && \
+    pip install apache-airflow-providers-slack==4.0.1 && \
+    pip install apache-airflow-providers-http==2.0.1
 
 # Copy the airflow.cfg file (config)
-# COPY ./config/airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
+#COPY ./config/airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
 
 # Set the owner of the files in AIRFLOW_HOME to the user airflow
 RUN chown -R airflow: ${AIRFLOW_HOME}

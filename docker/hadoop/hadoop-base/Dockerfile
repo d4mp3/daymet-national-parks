@@ -1,9 +1,7 @@
-FROM python:3.10-bookworm
+FROM openjdk:8-jdk-slim-buster
 LABEL maintainer="dampe"
 
-ENV DEBIAN_FRONTEND=noninteractive
-
-ENV HADOOP_VERSION=3.3.6
+ENV HADOOP_VERSION=3.1.1
 ENV HADOOP_HOME=/opt/hadoop
 ENV HADOOP_CONF_DIR=/etc/hadoop
 ENV USER=root
@@ -15,22 +13,8 @@ RUN apt-get update -yqq && \
     apt-utils \
     curl \
     wget \
-    netcat-traditional && \
+    netcat && \
     apt-get autoremove -yqq --purge
-
-# ENV TZ="Europe/Warsaw"
-
-# RUN apt-get install -yqq openjdk-8-jdk
-
-RUN wget http://www.mirbsd.org/~tg/Debs/sources.txt/wtf-bookworm.sources
-RUN mkdir -p /etc/apt/sources.list.d
-RUN mv wtf-bookworm.sources /etc/apt/sources.list.d/
-RUN apt-get update
-RUN apt-get install -yqq openjdk-8-jdk
- 
-# Setup JAVA_HOME 
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-RUN export JAVA_HOME
 
 RUN mkdir -p /opt/hadoop
 
@@ -51,3 +35,8 @@ COPY ./entrypoint.sh .
 RUN chmod +x ./entrypoint.sh
 
 ENTRYPOINT [ "./entrypoint.sh" ]
+
+
+
+
+

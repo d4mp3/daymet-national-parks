@@ -1,7 +1,5 @@
 #!/bin/bash
 
-export CORE_CONF_FS_DEFAULTFS=${CORE_CONF_FS_DEFAULTFS:-hdfs://`hostname -f`:9000}
-
 function wait_for_it()
 {
     local serviceport=$1

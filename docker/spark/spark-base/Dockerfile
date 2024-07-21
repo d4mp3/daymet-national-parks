@@ -2,9 +2,9 @@ FROM hadoop-base:latest
 LABEL maintainer="MarcLamberti"
 
 # Defining useful environment variables
-ENV SPARK_VERSION=3.4.3
-ENV HADOOP_VERSION=3.3.6
-ENV SCALA_VERSION=2.13.0
+ENV SPARK_VERSION=2.4.5
+ENV HADOOP_VERSION=2.7
+ENV SCALA_VERSION=2.12.4
 ENV SCALA_HOME=/usr/share/scala
 ENV SPARK_HOME=/usr/local/spark
 ENV SBT_VERSION=1.2.8
@@ -19,7 +19,7 @@ ENV PATH=$SPARK_HOME/bin/:$PATH
 RUN apt-get update -yqq && \
     apt-get upgrade -yqq && \
     apt-get install -yqq \
-    netcat-traditional \
+    netcat \
     apt-utils \
     curl \
     vim \
@@ -29,9 +29,7 @@ RUN apt-get update -yqq && \
     jq \
     wget \
     software-properties-common
- 
 
-    
 # Installing Scala
 WORKDIR /tmp
 
@@ -52,12 +50,12 @@ RUN export PATH="/usr/local/sbt/bin:$PATH" && \
     sbt sbtVersion
 
 # Adding dependencies for PySpark
-# RUN apt-get install -y curl python3.10
-# RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
-# RUN update-alternatives --set python /usr/bin/python3.10
-# RUN curl https://bootstrap.pypa.io/pip/3.7/get-pip.py | python3
-# RUN pip install --upgrade "pip==24.1.2"
-RUN apt-get install -yqq python3-numpy python3-matplotlib python3-scipy python3-pandas python3-simpy3
+RUN apt-get install -y curl python3.7 python3.7-dev python3.7-distutils
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
+RUN update-alternatives --set python /usr/bin/python3.7
+RUN curl https://bootstrap.pypa.io/pip/3.7/get-pip.py | python3
+RUN pip install --upgrade "pip==20.2.4"
+RUN apt-get install -yqq python3-numpy python3-matplotlib python3-scipy python3-pandas python3-simpy
 
 #RUN apt-get install -yqq python3 python3-numpy python3-matplotlib python3-scipy python3-pandas python3-simpy && \
 #    update-alternatives --install "/usr/bin/python" "python" "$(which python3)" 1 && \
@@ -66,12 +64,14 @@ RUN apt-get install -yqq python3-numpy python3-matplotlib python3-scipy python3-
 # Installing Spark
 WORKDIR ${SPARK_HOME}
 
-RUN wget --no-verbose https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3-scala2.13.tgz && \
-    tar zxf spark-${SPARK_VERSION}-bin-hadoop3-scala2.13.tgz && \ 
-    mv spark-${SPARK_VERSION}-bin-hadoop3-scala2.13/* . && \
-    rm -rf spark-${SPARK_VERSION}-bin-hadoop3-scala2.13.tgz && \
-    rm -rf spark-${SPARK_VERSION}-bin-hadoop3-scala2.13
+RUN wget --no-verbose https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
+    tar zxf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \ 
+    mv spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}/* . && \
+    rm -rf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
+    rm -rf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}
 
+# Use Spark with Hive
+RUN cp ${HIVE_HOME}/conf/hive-site.xml $SPARK_HOME/conf
 
 RUN apt-get autoremove -yqq --purge && \
     apt-get clean && \
