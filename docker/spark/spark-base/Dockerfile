@@ -19,7 +19,7 @@ ENV PATH=$SPARK_HOME/bin/:$PATH
 RUN apt-get update -yqq && \
     apt-get upgrade -yqq && \
     apt-get install -yqq \
-    netcat \
+    netcat-traditional \
     apt-utils \
     curl \
     vim \
@@ -29,7 +29,9 @@ RUN apt-get update -yqq && \
     jq \
     wget \
     software-properties-common
+ 
 
+    
 # Installing Scala
 WORKDIR /tmp
 
@@ -50,11 +52,11 @@ RUN export PATH="/usr/local/sbt/bin:$PATH" && \
     sbt sbtVersion
 
 # Adding dependencies for PySpark
-RUN apt-get install -y curl python3.9 python3-dev
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
-RUN update-alternatives --set python /usr/bin/python3.9
-RUN curl https://bootstrap.pypa.io/pip/3.7/get-pip.py | python3
-RUN pip install --upgrade "pip==24.1.2"
+# RUN apt-get install -y curl python3.10
+# RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
+# RUN update-alternatives --set python /usr/bin/python3.10
+# RUN curl https://bootstrap.pypa.io/pip/3.7/get-pip.py | python3
+# RUN pip install --upgrade "pip==24.1.2"
 RUN apt-get install -yqq python3-numpy python3-matplotlib python3-scipy python3-pandas python3-simpy3
 
 #RUN apt-get install -yqq python3 python3-numpy python3-matplotlib python3-scipy python3-pandas python3-simpy && \

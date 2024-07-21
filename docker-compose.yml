@@ -81,7 +81,6 @@ services:
       interval: 10s
       retries: 10
 
-
 ######################################################
 # SPARK SERVICES
 ######################################################
@@ -149,6 +148,24 @@ services:
       interval: 10s
       retries: 10
 
+######################################################
+# AIRFLOW
+######################################################
+
+  airflow:
+    build: ./docker/airflow
+    restart: always
+    container_name: airflow
+    volumes:
+      - ./mnt/airflow/airflow.cfg:/opt/airflow/airflow.cfg
+      - ./mnt/airflow/dags:/opt/airflow/dags
+    ports:
+      - 8080:8080
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "airflow", "8080" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
 
 ######################################################
 # NETWORK
