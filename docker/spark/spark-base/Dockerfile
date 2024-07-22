@@ -1,5 +1,5 @@
 FROM hadoop-base:latest
-LABEL maintainer="MarcLamberti"
+LABEL maintainer="dampe"
 
 # Defining useful environment variables
 ENV SPARK_VERSION=2.4.5
