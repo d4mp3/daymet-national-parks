@@ -1,4 +1,3 @@
-version: '2.1'
 services:
 
 ######################################################
@@ -55,7 +54,7 @@ services:
     hostname: minio
     restart: always
     volumes:
-      - ./include/data/minio:/data
+      - ./mnt/minio:/data
     ports:
       - 9000:9000
       - 9001:9001
