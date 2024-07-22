@@ -5,7 +5,7 @@ services:
 # DATABASE SERVICE
 ######################################################
   postgres:
-    image: postgres:11.4-alpine
+    image: postgres:14-alpine
     restart: always
     container_name: postgres
     logging:
@@ -48,6 +48,26 @@ services:
       timeout: 45s
       interval: 10s
       retries: 10
+
+  minio:
+    image: minio/minio:RELEASE.2024-06-13T22-53-53Z
+    container_name: minio
+    hostname: minio
+    restart: always
+    volumes:
+      - ./include/data/minio:/data
+    ports:
+      - 9000:9000
+      - 9001:9001
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
 
 ######################################################
 # HADOOP SERVICES
@@ -93,94 +113,6 @@ services:
       timeout: 45s
       interval: 10s
       retries: 10
-
-  # hive-metastore:
-  #   build: ./docker/hive/hive-metastore
-  #   restart: always
-  #   container_name: hive-metastore
-  #   logging:
-  #     driver: "json-file"
-  #     options:
-  #         max-file: "5"
-  #         max-size: "10m"
-  #   depends_on:
-  #     - namenode
-  #     - datanode
-  #     - postgres
-  #   environment:
-  #     - SERVICE_PRECONDITION=namenode:9870 datanode:9864 postgres:5432
-  #   ports:
-  #     - "32761:9083"
-  #   healthcheck:
-  #     test: [ "CMD", "nc", "-z", "hive-metastore", "9083" ]
-  #     timeout: 45s
-  #     interval: 10s
-  #     retries: 10
-
-  # hive-server:
-  #   build: ./docker/hive/hive-server
-  #   restart: always
-  #   container_name: hive-server
-  #   logging:
-  #     driver: "json-file"
-  #     options:
-  #         max-file: "5"
-  #         max-size: "10m"
-  #   depends_on:
-  #     - hive-metastore
-  #   environment:
-  #     - SERVICE_PRECONDITION=hive-metastore:9083
-  #   ports:
-  #     - "32760:10000"
-  #     - "32759:10002"
-  #   healthcheck:
-  #     test: [ "CMD", "nc", "-z", "hive-server", "10002" ]
-  #     timeout: 45s
-  #     interval: 10s
-  #     retries: 10
-
-  # hive-webhcat:
-  #   build: ./docker/hive/hive-webhcat
-  #   restart: always
-  #   container_name: hive-webhcat
-  #   logging:
-  #     driver: "json-file"
-  #     options:
-  #         max-file: "5"
-  #         max-size: "10m"
-  #   depends_on:
-  #     - hive-server
-  #   environment:
-  #     - SERVICE_PRECONDITION=hive-server:10000
-  #   healthcheck:
-  #     test: [ "CMD", "nc", "-z", "hive-webhcat", "50111" ]
-  #     timeout: 45s
-  #     interval: 10s
-  #     retries: 10
-
-  # hue:
-  #   build: ./docker/hue
-  #   restart: always
-  #   container_name: hue
-  #   logging:
-  #     driver: "json-file"
-  #     options:
-  #         max-file: "5"
-  #         max-size: "10m"
-  #   depends_on:
-  #     - hive-server
-  #     - postgres
-  #   ports:
-  #     - "32762:8888"
-  #   volumes:
-  #     - ./mnt/hue/hue.ini:/usr/share/hue/desktop/conf/z-hue.ini
-  #   environment:
-  #     - SERVICE_PRECONDITION=hive-server:10000 postgres:5432
-  #   healthcheck:
-  #     test: [ "CMD", "nc", "-z", "hue", "8888" ]
-  #     timeout: 45s
-  #     interval: 10s
-  #     retries: 10
 
 ######################################################
 # SPARK SERVICES
@@ -272,8 +204,6 @@ services:
 # NETWORK
 ######################################################
 
-# Change name of default network otherwise URI invalid for HIVE
-# because of the _ contained by default network
 networks:
   default:
     name: airflow-network

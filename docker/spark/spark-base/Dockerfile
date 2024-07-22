@@ -70,9 +70,6 @@ RUN wget --no-verbose https://archive.apache.org/dist/spark/spark-${SPARK_VERSIO
     rm -rf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz && \
     rm -rf spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}
 
-# Use Spark with Hive
-RUN cp ${HIVE_HOME}/conf/hive-site.xml $SPARK_HOME/conf
-
 RUN apt-get autoremove -yqq --purge && \
     apt-get clean && \
     rm -rf /tmp/* /var/tmp/*
