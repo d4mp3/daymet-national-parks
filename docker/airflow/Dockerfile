@@ -1,5 +1,5 @@
 # Base Image
-FROM spark-base:latest
+FROM hadoop-base:latest
 LABEL maintainer="dampe"
 
 # Arguments that can be set with docker build
@@ -38,6 +38,11 @@ RUN apt-get update -y && \
 # Upgrade pip
 # Create airflow user 
 # Install apache airflow with subpackages
+RUN apt-get install -y curl python3.7 python3.7-dev python3.7-distutils
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
+RUN update-alternatives --set python /usr/bin/python3.7
+RUN curl https://bootstrap.pypa.io/pip/3.7/get-pip.py | python3
+
 RUN pip install --upgrade "pip==24.0" && \
     useradd -ms /bin/bash -d ${AIRFLOW_HOME} airflow && \
     pip install apache-airflow==${AIRFLOW_VERSION} --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.6.3/constraints-3.7.txt && \
