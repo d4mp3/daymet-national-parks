@@ -1,8 +1,9 @@
 services:
 
-######################################################
-# DATABASE SERVICE
-######################################################
+networks:
+  default:
+    name: airflow-network
+
   postgres:
     image: postgres:14-alpine
     restart: always
@@ -26,6 +27,9 @@ services:
       timeout: 45s
       interval: 10s
       retries: 10
+    networks:
+      - airflow-network
+
 
   minio:
     image: minio/minio:RELEASE.2024-06-13T22-53-53Z
@@ -46,10 +50,10 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    networks:
+      - airflow-network
 
-######################################################
-# SPARK SERVICES
-######################################################
+
   spark-master:
     image: airflow/spark-master
     build: ./docker/spark/master
@@ -64,6 +68,8 @@ services:
       timeout: 45s
       interval: 10s
       retries: 10
+    networks:
+      - airflow-network
 
 
   spark-worker:
@@ -81,11 +87,10 @@ services:
       timeout: 45s
       interval: 10s
       retries: 10
+    networks:
+      - airflow-network
 
 
-######################################################
-# AIRFLOW
-######################################################
   airflow:
     build: ./docker/airflow
     restart: always
@@ -104,6 +109,19 @@ services:
       timeout: 45s
       interval: 10s
       retries: 10
+    networks:
+      - airflow-network
+
+
+  metabase:
+    image: metabase/metabase:v0.50.4
+    restart: always
+    ports:
+      - 3000:3000
+    volumes:
+      - ./mnt/metabase:/metabase-data
+    networks:
+      - airflow-network
 
 
   docker-proxy:
@@ -113,10 +131,5 @@ services:
       - "2376:2375"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-
-######################################################
-# NETWORK
-######################################################
-networks:
-  default:
-    name: airflow-network
+    networks:
+      - airflow-network
