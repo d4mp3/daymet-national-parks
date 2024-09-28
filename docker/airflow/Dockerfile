@@ -53,6 +53,8 @@ RUN pip install --upgrade "pip==24.0" && \
     pip install apache-airflow-providers-slack==7.3.0 && \
     pip install apache-airflow-providers-http==3.0.0 && \
     pip install apache-airflow-providers-docker==3.6.0 && \
+    pip install apache-airflow-providers-postgres==5.4.0 && \
+    pip install astro-sdk-python[postgres]==1.5.4 && \
     pip install minio==7.1.14 && \
     pip install psycopg2==2.9.9
 
