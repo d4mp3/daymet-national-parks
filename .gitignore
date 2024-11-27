@@ -2,3 +2,4 @@
 /mnt/*
 !/mnt/airflow
 !/mnt/spark/notebooks
+.history
