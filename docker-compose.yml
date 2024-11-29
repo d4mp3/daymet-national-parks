@@ -1,17 +1,14 @@
 services:
 
-######################################################
-# DATABASE SERVICE
-######################################################
   postgres:
-    image: postgres:14-alpine
+    build: './docker/postgres'
     restart: always
     container_name: postgres
     logging:
       driver: "json-file"
       options:
-          max-file: "5"
-          max-size: "10m"
+        max-file: "5"
+        max-size: "10m"
     ports:
       - "32769:5432"
     volumes:
@@ -26,27 +23,8 @@ services:
       timeout: 45s
       interval: 10s
       retries: 10
-
-  adminer:
-    image: wodby/adminer:latest
-    restart: always
-    container_name: adminer
-    logging:
-      driver: "json-file"
-      options:
-          max-file: "5"
-          max-size: "10m"
-    ports:
-      - "32767:9000"
-    environment:
-      - ADMINER_DEFAULT_DB_DRIVER=psql
-      - ADMINER_DEFAULT_DB_HOST=postgres
-      - ADMINER_DEFAULT_DB_NAME=airflow
-    healthcheck:
-      test: [ "CMD", "nc", "-z", "adminer", "9000" ]
-      timeout: 45s
-      interval: 10s
-      retries: 10
+    networks:
+      - airflow-network
 
   minio:
     image: minio/minio:RELEASE.2024-06-13T22-53-53Z
@@ -67,122 +45,43 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+    networks:
+      - airflow-network
 
-######################################################
-# HADOOP SERVICES
-######################################################
-  namenode:
-    build: ./docker/hadoop/hadoop-namenode
-    restart: always
-    container_name: namenode
-    logging:
-      driver: "json-file"
-      options:
-          max-file: "5"
-          max-size: "10m"
-    ports:
-      - "32763:9870"
-    volumes:
-      - ./mnt/hadoop/namenode:/hadoop/dfs/name
-    environment:
-      - CLUSTER_NAME=hadoop_cluster
-    healthcheck:
-      test: [ "CMD", "nc", "-z", "namenode", "9870" ]
-      timeout: 45s
-      interval: 10s
-      retries: 10
-
-  datanode:
-    build: ./docker/hadoop/hadoop-datanode
-    restart: always
-    container_name: datanode
-    logging:
-      driver: "json-file"
-      options:
-          max-file: "5"
-          max-size: "10m"
-    depends_on:
-      - namenode
-    volumes:
-      - ./mnt/hadoop/datanode:/hadoop/dfs/data
-    environment:
-      - SERVICE_PRECONDITION=namenode:9870
-    healthcheck:
-      test: [ "CMD", "nc", "-z", "datanode", "9864" ]
-      timeout: 45s
-      interval: 10s
-      retries: 10
-
-######################################################
-# SPARK SERVICES
-######################################################
   spark-master:
-    build: ./docker/spark/spark-master
-    restart: always
+    image: airflow/spark-master
+    build: ./docker/spark/master
     container_name: spark-master
-    logging:
-      driver: "json-file"
-      options:
-          max-file: "5"
-          max-size: "10m"
     ports:
-      - "32766:8082"
-      - "32765:7077"
-    volumes:
-      - ./mnt/spark/apps:/opt/spark-apps
-      - ./mnt/spark/data:/opt/spark-data
+      - "8082:8080"
+      - "7077:7077"
+    environment:
+      - INIT_DAEMON_STEP=setup_spark
     healthcheck:
       test: [ "CMD", "nc", "-z", "spark-master", "8082" ]
       timeout: 45s
       interval: 10s
       retries: 10
+    networks:
+      - airflow-network
 
   spark-worker:
-    build: ./docker/spark/spark-worker
-    logging:
-      driver: "json-file"
-      options:
-          max-file: "5"
-          max-size: "10m"
+    image: airflow/spark-worker
+    build: ./docker/spark/worker
+    container_name: spark-worker
     depends_on:
       - spark-master
     ports:
-      - "32764:8081"
-    volumes:
-      - ./mnt/spark/apps:/opt/spark-apps
-      - ./mnt/spark/data:/opt/spark-data
+      - "8081:8081"
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
     healthcheck:
       test: [ "CMD", "nc", "-z", "spark-worker", "8081" ]
       timeout: 45s
       interval: 10s
       retries: 10
-
-  livy:
-    build: ./docker/livy
-    restart: always
-    container_name: livy
-    logging:
-      driver: "json-file"
-      options:
-          max-file: "5"
-          max-size: "10m"
-    depends_on:
-      - spark-worker
-    ports:
-      - "32758:8998"
-    environment:
-      - SPARK_MASTER_ENDPOINT=spark-master
-      - SPARK_MASTER_PORT=7077
-      - DEPLOY_MODE=client
-    healthcheck:
-      test: [ "CMD", "nc", "-z", "livy", "8998" ]
-      timeout: 45s
-      interval: 10s
-      retries: 10
-
-######################################################
-# AIRFLOW
-######################################################
+    networks:
+      - airflow-network
 
   airflow:
     build: ./docker/airflow
@@ -202,11 +101,41 @@ services:
       timeout: 45s
       interval: 10s
       retries: 10
+    networks:
+      - airflow-network
 
-######################################################
-# NETWORK
-######################################################
+  metabase:
+    image: metabase/metabase:v0.50.4
+    container_name: metabase
+    volumes:
+      - ./mnt/metabase:/metabase-data
+    ports:
+      - 3000:3000
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase
+      MB_DB_PORT: 5432
+      MB_DB_USER: metabase
+      MB_DB_PASS: metabase
+      MB_DB_HOST: postgres
+    healthcheck:
+      test: curl --fail -I http://localhost:3000/api/health || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - airflow-network
+
+  docker-proxy:
+    image: alpine/socat
+    command: "TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock"
+    ports:
+      - "2376:2375"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - airflow-network
 
 networks:
-  default:
+  airflow-network:
     name: airflow-network

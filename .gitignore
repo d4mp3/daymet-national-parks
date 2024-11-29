@@ -1,3 +1,5 @@
 .venv/
 /mnt/*
-!/mnt/airflow/airflow.cfg
+!/mnt/airflow
+!/mnt/spark/notebooks
+.history
