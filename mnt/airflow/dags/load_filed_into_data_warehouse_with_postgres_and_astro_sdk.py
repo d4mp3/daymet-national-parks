@@ -7,6 +7,7 @@ from airflow.hooks.base import BaseHook
 from airflow.sensors.base import PokeReturnValue
 from airflow.operators.python import PythonOperator
 from airflow.providers.docker.operators.docker import DockerOperator
+from airflow.providers.slack.notifications.slack_notifier import SlackNotifier
 from astro import sql as aql
 from astro.files import File
 from astro.sql.table import Table, Metadata
@@ -23,6 +24,16 @@ SYMBOL = 'AAPL'
     schedule='@daily',
     catchup=False,
     tags=['load_filed_into_data_warehouse_with_postgres_and_astro_sdk'],
+    on_success_callback=SlackNotifier(
+        slack_conn_id='slack',
+        text='The DAG stock_market had succeded',
+        channel='general'
+    ),
+    on_failure_callback=SlackNotifier(
+        slack_conn_id='slack',
+        text='The DAG stock_market had failed',
+        channel='general'
+    )
 )
 def load_filed_into_data_warehouse_with_postgres_and_astro_sdk():
     
