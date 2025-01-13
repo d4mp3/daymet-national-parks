@@ -21,5 +21,3 @@ airflow scheduler &> /dev/null &
 
 # Run the web sever in foreground (for docker logs)
 exec airflow webserver
-
-python ./add_connections_from_json.py
