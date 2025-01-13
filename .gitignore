@@ -3,3 +3,4 @@
 !/mnt/airflow
 !/mnt/spark/notebooks
 .history
+mnt/airflow/dags/__pycache__/*

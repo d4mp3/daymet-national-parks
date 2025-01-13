@@ -13,10 +13,12 @@ services:
       - "32769:5432"
     volumes:
       - ./mnt/postgres:/var/lib/postgresql/data/pgdata
+    env_file:
+      - .env
     environment:
-      - POSTGRES_USER=airflow
-      - POSTGRES_PASSWORD=airflow
-      - POSTGRES_DB=airflow
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
       - PGDATA=/var/lib/postgresql/data/pgdata
     healthcheck:
       test: [ "CMD", "pg_isready", "-q", "-d", "airflow", "-U", "airflow" ]
@@ -36,9 +38,11 @@ services:
     ports:
       - 9000:9000
       - 9001:9001
+    env_file:
+      - .env
     environment:
-      MINIO_ROOT_USER: minio
-      MINIO_ROOT_PASSWORD: minio123
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     command: server /data --console-address ":9001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
@@ -111,12 +115,14 @@ services:
       - ./mnt/metabase:/metabase-data
     ports:
       - 3000:3000
+    env_file:
+      - .env
     environment:
       MB_DB_TYPE: postgres
       MB_DB_DBNAME: metabase
       MB_DB_PORT: 5432
-      MB_DB_USER: metabase
-      MB_DB_PASS: metabase
+      MB_DB_USER: ${MB_DB_USER}
+      MB_DB_PASS: ${MB_DB_PASS}
       MB_DB_HOST: postgres
     healthcheck:
       test: curl --fail -I http://localhost:3000/api/health || exit 1
