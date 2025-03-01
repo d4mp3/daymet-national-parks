@@ -5,3 +5,5 @@
 .history
 mnt/airflow/dags/__pycache__/*
 mnt/airflow/dags/include/stock_market/__pycache__/*
+*/.ipynb_checkpoints/
+
