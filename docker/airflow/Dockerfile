@@ -36,7 +36,7 @@ RUN apt-get update -y && \
     && apt-get autoremove -yqq --purge && apt-get clean
 
 # Upgrade pip
-# Create airflow user 
+# Create airflow user
 # Install apache airflow with subpackages
 RUN apt-get install -y curl python3.7 python3.7-dev python3.7-distutils
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
@@ -81,5 +81,3 @@ EXPOSE 8080
 
 # Execute start-airflow.sh
 CMD [ "./start-airflow.sh" ]
-
-    
